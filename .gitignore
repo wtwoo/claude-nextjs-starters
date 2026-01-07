@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 민감한 정보 보호 (Claude Code Slack Webhook URL)
+.claude/.env
 
 # vercel
 .vercel

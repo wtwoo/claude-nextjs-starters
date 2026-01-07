@@ -1,6 +1,8 @@
 커밋 메시지: $ARGUMENTS
 현재 변경사항을 분석하고 커밋을 생성해주세요.
 
+**중요: 커밋 메시지에 "🤖 Generated with Claude Code" 및 "Co-Authored-By" 부분은 포함하지 말 것**
+
 ## 커밋 메시지 작성 규칙
 
 ### 기본 규칙

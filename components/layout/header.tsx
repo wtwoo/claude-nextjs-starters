@@ -6,6 +6,7 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Container } from './container'
 import { ThemeToggle } from './theme-toggle'
+import { NAV_ITEMS } from '@/lib/constants'
 
 /**
  * 헤더 네비게이션 컴포넌트
@@ -13,12 +14,6 @@ import { ThemeToggle } from './theme-toggle'
  */
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const navItems = [
-    { href: '/', label: '홈' },
-    { href: '/examples', label: '예제' },
-    { href: '/forms', label: '폼' }
-  ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
@@ -30,8 +25,8 @@ export function Header() {
           </Link>
 
           {/* 데스크탑 네비게이션 */}
-          <nav className="hidden md:flex gap-6">
-            {navItems.map((item) => (
+          <nav className="hidden md:flex gap-6" aria-label="메인 네비게이션">
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -53,6 +48,8 @@ export function Header() {
               className="md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="메뉴 토글"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {isMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -65,9 +62,13 @@ export function Header() {
 
         {/* 모바일 네비게이션 메뉴 */}
         {isMenuOpen && (
-          <div className="border-t md:hidden">
+          <nav
+            id="mobile-navigation"
+            className="border-t md:hidden"
+            aria-label="모바일 네비게이션"
+          >
             <div className="space-y-2 px-2 py-4">
-              {navItems.map((item) => (
+              {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -78,7 +79,7 @@ export function Header() {
                 </Link>
               ))}
             </div>
-          </div>
+          </nav>
         )}
       </Container>
     </header>

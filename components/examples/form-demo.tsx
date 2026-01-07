@@ -10,18 +10,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { contactFormSchema, type ContactFormData } from '@/lib/validations'
+import { type SubmitStatus } from '@/lib/constants'
 
 /**
  * 폼 데모 컴포넌트
  * React Hook Form + Zod를 사용한 폼 검증 및 제출
  */
 export function FormDemo() {
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema)
@@ -29,16 +31,28 @@ export function FormDemo() {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
+      setSubmitStatus('loading')
+      setErrorMessage('')
+
       // 실제로는 API 호출을 여기서 수행
+      await new Promise(resolve => setTimeout(resolve, 1000))
       console.log('폼 데이터:', data)
       setSubmitStatus('success')
       reset()
 
       // 3초 후 상태 초기화
       setTimeout(() => setSubmitStatus('idle'), 3000)
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error
+        ? error.message
+        : '알 수 없는 오류가 발생했습니다'
+
+      setErrorMessage(message)
       setSubmitStatus('error')
-      setTimeout(() => setSubmitStatus('idle'), 3000)
+      setTimeout(() => {
+        setSubmitStatus('idle')
+        setErrorMessage('')
+      }, 3000)
     }
   }
 
@@ -55,9 +69,12 @@ export function FormDemo() {
 
       {/* 오류 메시지 */}
       {submitStatus === 'error' && (
-        <Alert className="border-red-500 bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200">
+        <Alert
+          className="border-red-500 bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200"
+          role="alert"
+        >
           <AlertDescription>
-            ❌ 오류가 발생했습니다. 다시 시도해주세요.
+            ❌ {errorMessage || '오류가 발생했습니다. 다시 시도해주세요.'}
           </AlertDescription>
         </Alert>
       )}
@@ -70,9 +87,18 @@ export function FormDemo() {
           placeholder="홍길동"
           {...register('name')}
           className={errors.name ? 'border-red-500' : ''}
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'name-error' : undefined}
+          disabled={isSubmitting}
         />
         {errors.name && (
-          <p className="text-sm text-red-500">{errors.name.message}</p>
+          <p
+            id="name-error"
+            className="text-sm text-red-500"
+            role="alert"
+          >
+            {errors.name.message}
+          </p>
         )}
       </div>
 
@@ -85,9 +111,18 @@ export function FormDemo() {
           placeholder="example@example.com"
           {...register('email')}
           className={errors.email ? 'border-red-500' : ''}
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'email-error' : undefined}
+          disabled={isSubmitting}
         />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
+          <p
+            id="email-error"
+            className="text-sm text-red-500"
+            role="alert"
+          >
+            {errors.email.message}
+          </p>
         )}
       </div>
 
@@ -100,9 +135,18 @@ export function FormDemo() {
           rows={4}
           {...register('message')}
           className={errors.message ? 'border-red-500' : ''}
+          aria-invalid={!!errors.message}
+          aria-describedby={errors.message ? 'message-error' : undefined}
+          disabled={isSubmitting}
         />
         {errors.message && (
-          <p className="text-sm text-red-500">{errors.message.message}</p>
+          <p
+            id="message-error"
+            className="text-sm text-red-500"
+            role="alert"
+          >
+            {errors.message.message}
+          </p>
         )}
       </div>
 
@@ -111,6 +155,7 @@ export function FormDemo() {
         <Checkbox
           id="subscribe"
           {...register('subscribe')}
+          disabled={isSubmitting}
         />
         <Label htmlFor="subscribe" className="font-normal cursor-pointer">
           뉴스레터 구독하기
@@ -118,8 +163,12 @@ export function FormDemo() {
       </div>
 
       {/* 제출 버튼 */}
-      <Button type="submit" className="w-full">
-        제출하기
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? '제출 중...' : '제출하기'}
       </Button>
     </form>
   )
